@@ -189,6 +189,35 @@ hypothesisTest <- function(p) { ##Check if P values are significant
     }
 }
 
+geomorphologySize <- function(df) {
+    sedY <- df %>%
+        filter(Sediment.Storage..Y.N. == "Y") %>%
+            select(Length..cm., Diameter..cm.) %>%
+                mutate(Volume..cm. = (pi * ((Diameter..cm. / 2) ^ 2) * Length..cm.))
+    sedN <- df %>%
+        filter(Sediment.Storage..Y.N. == "N") %>%
+            select(Length..cm., Diameter..cm.) %>%
+                mutate(Volume..cm. = (pi * ((Diameter..cm. / 2) ^ 2) * Length..cm.))
+    t <- t.test(x = sedN$Volume..cm.,y = sedY$Volume..cm., alternative = "two.sided")
+    cat("\n")
+    print("Relationship Between Volume and Sedimentation")
+    hypothesisTest(t$p.value)
+}
+
+positionSize <- function(df) {
+    df <- df %>% mutate(Num = as.integer(str_sub(df$ID.Number, 0, -2))) %>%
+        filter(Num > 14) %>%
+            mutate(Volume..cm. = (pi * ((Diameter..cm. / 2) ^ 2) * Length..cm.))
+    
+    ggplot() + geom_point(data = df, aes(x = Num, y = Diameter..cm.)) + geom_smooth(data = df, aes(x = Num, y = Diameter..cm.), method = "lm")
+    ggsave("Output/Position.Size.jpg")
+    dev.off()
+    mod <- tidy(lm(Diameter..cm. ~ Num, data = df))
+    cat("\n")
+    print("Relationship Between Size and Position Down River")
+    hypothesisTest(mod$p.value[2])
+}
+
 startUpdate <- function(df) {
     df <- df %>% ##Exclude any LWD that do not meet minimum requirements
         filter(Length..cm. > 200 & Diameter..cm. > 10)
@@ -204,6 +233,8 @@ startUpdate <- function(df) {
     updateOrient(df) ##Calculate Orientation Chi^2 and graph
     updateSed(df)
     lengthVersusDiameterGraph(df)
+    geomorphologySize(df)
+    positionSize(df)
     print("================================================================")
     sink()
 }
