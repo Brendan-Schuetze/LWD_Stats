@@ -54,7 +54,7 @@ orientChi <- function(df) {
 
     ##Print Results of Chi Square Analysis
     cat("\n")
-    print("Relationship Between Orientation and Diameter")
+    print("Effect of Diameter on Channel Orientation")
     ##print(temp.dist) 
     c <- chisq.test(temp.dist)
     #print(c) #Print Chi Square Full Results
@@ -134,7 +134,7 @@ updateSed <- function(df) {
     
     colnames(temp.dist) <- c("Yes", "No")
     cat("\n")
-    print("Relationship Between Sedimentation and Orientation")
+    print("Effect of Channel Orientation on Sedimentation")
     c <- chisq.test(temp.dist)
     ##print(c) #Print Chi Square Full Results
     hypothesisTest(c$p.value)
@@ -143,7 +143,7 @@ updateSed <- function(df) {
     temp.dist <- data.frame(c(table(filter(df, Channel.Orientation == "A")$Pool.FF..Y.N.)[2], table(filter(df, Channel.Orientation == "B")$Pool.FF..Y.N.)[2], table(filter(df, Channel.Orientation == "C")$Pool.FF..Y.N.)[2], table(filter(df, Channel.Orientation == "D")$Pool.FF..Y.N.)[2]), c(table(filter(df, Channel.Orientation == "A")$Pool.FF..Y.N.)[1], table(filter(df, Channel.Orientation == "B")$Pool.FF..Y.N.)[1], table(filter(df, Channel.Orientation == "C")$Pool.FF..Y.N.)[1], table(filter(df, Channel.Orientation == "D")$Pool.FF..Y.N.)[1])) #Create Dataframe for Pool Formation
     colnames(temp.dist) <- c("Yes", "No")
     cat("\n")
-    print("Relationship Between Pool Formation and Orientation")
+    print("Effect of Channel Orientation on Pool Formation")
     c <- chisq.test(temp.dist)
     ##print(c) #Print Chi Square Full Results
     hypothesisTest(c$p.value)
@@ -199,7 +199,7 @@ geomorphologySize <- function(df) {
             select(Length..cm., Diameter..cm.) %>%
                 mutate(Volume..cm. = (pi * ((Diameter..cm. / 2) ^ 2) * Length..cm.))
     t <- t.test(x = sedN$Volume..cm.,y = sedY$Volume..cm., alternative = "two.sided")
-    print("Relationship Between Volume and Sedimentation")
+    print("Effect of Between Volume on Sedimentation")
     hypothesisTest(t$p.value)
 
     cat("\n")
@@ -212,7 +212,7 @@ geomorphologySize <- function(df) {
             select(Length..cm., Diameter..cm.) %>%
                 mutate(Volume..cm. = (pi * ((Diameter..cm. / 2) ^ 2) * Length..cm.))
     t <- t.test(x = poolN$Volume..cm.,y = poolY$Volume..cm., alternative = "two.sided")
-    print("Relationship Between Volume and Pool.FF")
+    print("Effect of Between Volume on Pool.FF")
     hypothesisTest(t$p.value)
 }
 
@@ -228,8 +228,21 @@ positionSize <- function(df) {
     cat("\n")
     print("================================================================")
     cat("\n")
-    print("Relationship Between Size and Position Down River")
+    print("Effect of Position Down River on Size")
     hypothesisTest(mod$p.value[2])
+}
+
+bfStats <- function(df) {
+    ggplot() + geom_density(data = df, aes(x = X..Bankfull.Channel)) + facet_wrap(~ Channel.Orientation)
+    ggsave("Output/Bankfull.Percent.Dist.jpg")
+    dev.off()
+    
+    print("Effect of Channel Orientation on Bankfull Percentage")
+    bf.aov <- aov(X..Bankfull.Channel ~ Channel.Orientation, data = df)
+    bf.sum <- summary(bf.aov)
+    hypothesisTest((bf.sum[[1]][["Pr(>F)"]][1]))
+
+    
 }
 
 startUpdate <- function(df) {
@@ -245,6 +258,7 @@ startUpdate <- function(df) {
     largeLWD(df) ##Identify Large LWD
     printStats(df, mean.Length, mean.Diameter) ##Calculate Basic Statistics
     updateOrient(df) ##Calculate Orientation Chi^2 and graph
+    bfStats(df)
     updateSed(df)
     lengthVersusDiameterGraph(df)
     geomorphologySize(df)

@@ -32,7 +32,7 @@
         A         B         C         D 
 51.138088 13.353566 31.411229  4.097117 
 
-[1] "Relationship Between Orientation and Diameter"
+[1] "Effect of Diameter on Channel Orientation"
 [1] "P Value: 0.325116029919334"
 [1] "### Fail to Reject Null Hypothesis ###"
 
@@ -40,31 +40,34 @@
 [1] "P Value: 0.272491361170403"
 [1] "### Fail to Reject Null Hypothesis ###"
 
+[1] "Effect of Channel Orientation on Bankfull Percentage"
+[1] "P Value: 0.00103229548897802"
+[1] "#!#     Reject Null Hypothesis     #!#"
 [1] "================================================================"
 
 [1] "Sedimentation & Pool Statistics"
 [1] "Sediment Storage Y/N 321 : 338"
 [1] "Pool Formation Y/N 228 : 431"
 
-[1] "Relationship Between Sedimentation and Orientation"
+[1] "Effect of Channel Orientation on Sedimentation"
 [1] "P Value: 0.645299512637785"
 [1] "### Fail to Reject Null Hypothesis ###"
 
-[1] "Relationship Between Pool Formation and Orientation"
+[1] "Effect of Channel Orientation on Pool Formation"
 [1] "P Value: 0.351118279279951"
 [1] "### Fail to Reject Null Hypothesis ###"
 
-[1] "Relationship Between Volume and Sedimentation"
+[1] "Effect of Between Volume on Sedimentation"
 [1] "P Value: 0.000489858921931529"
 [1] "#!#     Reject Null Hypothesis     #!#"
 
-[1] "Relationship Between Volume and Pool.FF"
+[1] "Effect of Between Volume on Pool.FF"
 [1] "P Value: 5.33489541246536e-08"
 [1] "#!#     Reject Null Hypothesis     #!#"
 
 [1] "================================================================"
 
-[1] "Relationship Between Size and Position Down River"
+[1] "Effect of Position Down River on Size"
 [1] "P Value: 0.304358993428714"
 [1] "### Fail to Reject Null Hypothesis ###"
 
