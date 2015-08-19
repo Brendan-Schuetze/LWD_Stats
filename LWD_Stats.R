@@ -118,7 +118,7 @@ updateOrient <- function(df) {
 }
 
 lengthVersusDiameterGraph <- function(df){ ##Graph Length versus Diameter
-    ggplot() + geom_point(data = df, aes(x = Diameter..cm., y = Length..cm.)) + ylim(0, 5000)
+    ggplot() + geom_point(data = df, aes(x = Diameter..cm., y = Length..cm.)) + ylim(0, 5000) + geom_smooth(data = df, aes(x = Diameter..cm., y = Length..cm.)) + xlim(min(df$Diameter..cm.), 65)
     ggsave("Output/Length.Diameter.Scatterplot.jpg")
     dev.off()
 }
@@ -129,7 +129,6 @@ updateSed <- function(df) {
     print("Sedimentation & Pool Statistics")
     print(paste("Sediment Storage Y/N", table(factor(df$Sediment.Storage..Y.N.))[2], ":", table(factor(df$Sediment.Storage..Y.N.))[1]))
     print(paste("Pool Formation Y/N", table(factor(df$Pool.FF..Y.N.))[2], ":", table(factor(df$Pool.FF..Y.N.))[1]))
-    cat("\n")
     
     temp.dist <- data.frame(c(table(filter(df, Channel.Orientation == "A")$Sediment.Storage..Y.N.)[2], table(filter(df, Channel.Orientation == "B")$Sediment.Storage..Y.N.)[2], table(filter(df, Channel.Orientation == "C")$Sediment.Storage..Y.N.)[2], table(filter(df, Channel.Orientation == "D")$Sediment.Storage..Y.N.)[2]), c(table(filter(df, Channel.Orientation == "A")$Sediment.Storage..Y.N.)[1], table(filter(df, Channel.Orientation == "B")$Sediment.Storage..Y.N.)[1], table(filter(df, Channel.Orientation == "C")$Sediment.Storage..Y.N.)[1], table(filter(df, Channel.Orientation == "D")$Sediment.Storage..Y.N.)[1])) #Create Dataframe for Sed
     
@@ -148,6 +147,7 @@ updateSed <- function(df) {
     c <- chisq.test(temp.dist)
     ##print(c) #Print Chi Square Full Results
     hypothesisTest(c$p.value)
+    cat("\n")
     
      
 }
@@ -199,8 +199,20 @@ geomorphologySize <- function(df) {
             select(Length..cm., Diameter..cm.) %>%
                 mutate(Volume..cm. = (pi * ((Diameter..cm. / 2) ^ 2) * Length..cm.))
     t <- t.test(x = sedN$Volume..cm.,y = sedY$Volume..cm., alternative = "two.sided")
-    cat("\n")
     print("Relationship Between Volume and Sedimentation")
+    hypothesisTest(t$p.value)
+
+    cat("\n")
+    poolY <- df %>% ##Relationship Between Volume and Pool.FF
+        filter(Pool.FF..Y.N. == "Y") %>%
+            select(Length..cm., Diameter..cm.) %>%
+                mutate(Volume..cm. = (pi * ((Diameter..cm. / 2) ^ 2) * Length..cm.))
+    poolN <- df %>%
+        filter(Pool.FF..Y.N. == "N") %>%
+            select(Length..cm., Diameter..cm.) %>%
+                mutate(Volume..cm. = (pi * ((Diameter..cm. / 2) ^ 2) * Length..cm.))
+    t <- t.test(x = poolN$Volume..cm.,y = poolY$Volume..cm., alternative = "two.sided")
+    print("Relationship Between Volume and Pool.FF")
     hypothesisTest(t$p.value)
 }
 
@@ -209,10 +221,12 @@ positionSize <- function(df) {
         filter(Num > 14) %>%
             mutate(Volume..cm. = (pi * ((Diameter..cm. / 2) ^ 2) * Length..cm.))
     
-    ggplot() + geom_point(data = df, aes(x = Num, y = Diameter..cm.)) + geom_smooth(data = df, aes(x = Num, y = Diameter..cm.), method = "lm")
+    ggplot() + geom_point(data = df, aes(x = Num, y = Diameter..cm.)) + geom_smooth(data = df, aes(x = Num, y = Diameter..cm.))
     ggsave("Output/Position.Size.jpg")
     dev.off()
-    mod <- tidy(lm(Diameter..cm. ~ Num, data = df))
+    mod <- tidy(lm(Diameter..cm.*Length..cm. ~ Num, data = df))
+    cat("\n")
+    print("================================================================")
     cat("\n")
     print("Relationship Between Size and Position Down River")
     hypothesisTest(mod$p.value[2])
@@ -235,6 +249,7 @@ startUpdate <- function(df) {
     lengthVersusDiameterGraph(df)
     geomorphologySize(df)
     positionSize(df)
+    cat("\n")
     print("================================================================")
     sink()
 }

@@ -4,24 +4,24 @@
 [1] "Their ID(s) are shown below"
 [1] "016L" "87R"  "130R" "136L" "365L"
 
-[1] "6 pieces of *Large* LWD found"
+[1] "10 pieces of *Large* LWD found"
 [1] "Their ID(s) are shown below"
-[1] "78R"  "85R"  "95R"  "206L" "347L" "350R"
+ [1] "78R"  "85R"  "95R"  "206L" "347L" "350R" "592R" "599L" "639R" "648L"
 
 [1] "================================================================"
 
 [1] "Stream Stats Metric"
-[1] "Total Number of LWD Pieces: 568"
-[1] "Mean Length 6.15905070422535 meters"
-[1] "Mean Diameter 23.0222323943662 cm"
-[1] "Mean Volume 0.256388491918701 m^3"
+[1] "Total Number of LWD Pieces: 659"
+[1] "Mean Length 6.16676342943854 meters"
+[1] "Mean Diameter 23.4053050075873 cm"
+[1] "Mean Volume 0.265323537912209 m^3"
 
 [1] "================================================================"
 
 [1] "Distribution of Factor Variables"
-[1] "Ratio of Coniferous to Deciduous to Unknown:  148 : 73 : 347"
-[1] "Ratio of L/R/U Bank Placement:  261 : 289 : 18"
-[1] "Number of Tagged Pieces: 32"
+[1] "Ratio of Coniferous to Deciduous to Unknown:  162 : 97 : 400"
+[1] "Ratio of L/R/U Bank Placement:  303 : 338 : 18"
+[1] "Number of Tagged Pieces: 39"
 
 [1] "================================================================"
 
@@ -30,27 +30,42 @@
 [1] "Percentages"
 
         A         B         C         D 
-52.640845 12.676056 30.457746  4.225352 
+51.138088 13.353566 31.411229  4.097117 
 
 [1] "Relationship Between Orientation and Diameter"
-[1] "P Value: 0.501937237340103"
+[1] "P Value: 0.325116029919334"
 [1] "### Fail to Reject Null Hypothesis ###"
 
 [1] "Relationship Between Orientation and Length"
-[1] "P Value: 0.206350185815351"
+[1] "P Value: 0.272491361170403"
 [1] "### Fail to Reject Null Hypothesis ###"
 
 [1] "================================================================"
 
 [1] "Sedimentation & Pool Statistics"
-[1] "Sediment Storage Y/N 272 : 296"
-[1] "Pool Formation Y/N 200 : 368"
+[1] "Sediment Storage Y/N 321 : 338"
+[1] "Pool Formation Y/N 228 : 431"
 
 [1] "Relationship Between Sedimentation and Orientation"
-[1] "P Value: 0.760947135889086"
+[1] "P Value: 0.645299512637785"
 [1] "### Fail to Reject Null Hypothesis ###"
 
 [1] "Relationship Between Pool Formation and Orientation"
-[1] "P Value: 0.262442242381076"
+[1] "P Value: 0.351118279279951"
 [1] "### Fail to Reject Null Hypothesis ###"
+
+[1] "Relationship Between Volume and Sedimentation"
+[1] "P Value: 0.000489858921931529"
+[1] "#!#     Reject Null Hypothesis     #!#"
+
+[1] "Relationship Between Volume and Pool.FF"
+[1] "P Value: 5.33489541246536e-08"
+[1] "#!#     Reject Null Hypothesis     #!#"
+
+[1] "================================================================"
+
+[1] "Relationship Between Size and Position Down River"
+[1] "P Value: 0.304358993428714"
+[1] "### Fail to Reject Null Hypothesis ###"
+
 [1] "================================================================"
