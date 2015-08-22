@@ -1,12 +1,19 @@
-##Brendan Schuetze
+##=============================##
 ##LWD Stats
+##Author: Brendan Schuetze
+##Copyright MessenSchuetze Lab
 ##Started July 22, 2015
+##=============================##
 
-library(ggplot2)
-library(dplyr)
-library(broom)
-library(reshape2)
-library(stringr)
+##Import Libraries
+library(ggplot2)  #Better Graphs
+library(dplyr)    #SQL-like Syntax for Datframe Manipulation
+library(plyr)     #Avoid Bugs
+library(broom)    #Tidier Summaries of Regression Models
+library(reshape2) #Dataframe Manipulation
+library(stringr)  #String Manipulation
+library(ggthemes) #Better ggplot2 Themes
+
 
 printStats <- function(df, mean.Length, mean.Diameter) { #Basic Stats about Data Collected So far
     print("================================================================")
@@ -110,9 +117,10 @@ updateOrient <- function(df) {
     ##Distribution of Channel Orientations Graph By Diameter
     Channel.Orientation.Graph <- ggplot(data = df) + geom_density(aes(x = Diameter..cm.)) + facet_wrap( ~ Channel.Orientation)
     ggsave("Output/Channel.Orientation.Diameter.jpg")
-
+    
     ##Distribution of Channel Orientations By Length
-    Channel.Orientation.Graph <- ggplot(data = df) + geom_density(aes(x = Length..cm.)) + facet_wrap( ~ Channel.Orientation) + xlim(200, 1800)
+    df$Channel.Orientation <- revalue(df$Channel.Orientation, c("A" = "A Orientation", "B" = "B Orientation", "C" = "C Orientation", "D" = "D Orientation"))
+    Channel.Orientation.Graph <- ggplot(data = df) + geom_density(aes(x = Length..cm.)) + facet_wrap( ~ Channel.Orientation) + xlim(200, 1800) + theme_tufte() + ggtitle("Distribution of Lengths by Channel Orientation \n") + xlab("Lengths") + ylab("Density \n")
     ggsave("Output/Channel.Orientation.Length.jpg")
     dev.off()
 }
@@ -217,11 +225,18 @@ geomorphologySize <- function(df) {
 }
 
 positionSize <- function(df) {
+    df.temp <- df %>% mutate(Num = as.integer(str_sub(df$ID.Number, 0, -2))) %>%
+        filter(Num < 14) %>%
+            mutate(Num = Num + nrow(df)) %>%
+                 mutate(Volume..cm. = (pi * ((Diameter..cm. / 2) ^ 2) * Length..cm.))
+    
     df <- df %>% mutate(Num = as.integer(str_sub(df$ID.Number, 0, -2))) %>%
         filter(Num > 14) %>%
             mutate(Volume..cm. = (pi * ((Diameter..cm. / 2) ^ 2) * Length..cm.))
+
+    df <- rbind(df, df.temp)
     
-    ggplot() + geom_point(data = df, aes(x = Num, y = Diameter..cm.)) + geom_smooth(data = df, aes(x = Num, y = Diameter..cm.))
+    ggplot() + geom_point(data = df, aes(x = Num, y = Diameter..cm.)) + geom_smooth(data = df, aes(x = Num, y = Diameter..cm.)) + xlab("LWD Pieces (lower numbers are closer to Hellgate)") + ylab("Diameter (centimeters)") + ggtitle("Change in Diameter Down River") + ylim(10, 65) + theme_tufte()
     ggsave("Output/Position.Size.jpg")
     dev.off()
     mod <- tidy(lm(Diameter..cm.*Length..cm. ~ Num, data = df))
@@ -236,6 +251,10 @@ bfStats <- function(df) {
     ggplot() + geom_density(data = df, aes(x = X..Bankfull.Channel)) + facet_wrap(~ Channel.Orientation)
     ggsave("Output/Bankfull.Percent.Dist.jpg")
     dev.off()
+
+    ggplot() + geom_violin(data = df, aes(x = factor(Channel.Orientation), y = X..Bankfull.Channel)) 
+    ggsave("Output/Bankfull.Percent.Dist.Violin.jpg")
+    dev.off()
     
     print("Effect of Channel Orientation on Bankfull Percentage")
     bf.aov <- aov(X..Bankfull.Channel ~ Channel.Orientation, data = df)
@@ -244,6 +263,8 @@ bfStats <- function(df) {
 
     
 }
+
+
 
 startUpdate <- function(df) {
     df <- df %>% ##Exclude any LWD that do not meet minimum requirements
