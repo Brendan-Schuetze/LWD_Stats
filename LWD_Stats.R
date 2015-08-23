@@ -23,6 +23,7 @@ printStats <- function(df, mean.Length, mean.Diameter) { #Basic Stats about Data
     print(paste("Mean Length", mean.Length / 100, "meters"))
     print(paste("Mean Diameter", mean.Diameter, "cm"))
     print(paste("Mean Volume", (pi / 4) * ((mean.Diameter / 100) ^ 2) * (mean.Length / 100), "m^3"))
+    print(paste("Mean Frequency of", nrow(df) / 11.80, "LWD/km"))
     cat("\n")
     print("================================================================")
     cat("\n")
