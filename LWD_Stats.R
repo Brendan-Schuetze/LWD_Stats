@@ -238,7 +238,12 @@ positionSize <- function(df) {
     df <- rbind(df, df.temp)
     
     ggplot() + geom_point(data = df, aes(x = Num, y = Diameter..cm.)) + geom_smooth(data = df, aes(x = Num, y = Diameter..cm.)) + xlab("LWD Pieces (lower numbers are closer to Hellgate)") + ylab("Diameter (centimeters)") + ggtitle("Change in Diameter Down River") + ylim(10, 65) + theme_tufte()
-    ggsave("Output/Position.Size.jpg")
+    ggsave("Output/Position.Diameter.jpg")
+    dev.off()
+    
+    ggplot() + geom_point(data = df, aes(x = Num, y = Volume..cm.)) + geom_smooth(data = df, aes(x = Num, y = Volume..cm.)) + xlab("LWD Pieces (lower numbers are closer to Hellgate)") + ylab("Volume (cubic centimeters)") + ggtitle("Change in Volume Down River") + theme_tufte()
+    ggsave("Output/Position.Volume.jpg")
+    
     dev.off()
     mod <- tidy(lm(Diameter..cm.*Length..cm. ~ Num, data = df))
     cat("\n")
@@ -265,7 +270,11 @@ bfStats <- function(df) {
     
 }
 
-
+graphStats <- function(df) {
+    ggplot() + geom_histogram(data = df, aes(x = Diameter..cm.), fill = "white", color = "black") + geom_vline(xintercept = 23.41, linetype = "longdash") + theme_tufte() + ggtitle("Distribution of Diameters") + xlab("Number of Pieces") + ylab("Density") + xlim(0, 65)
+    ggsave("Output/Diameter.Density.jpg")
+    dev.off()
+}
 
 startUpdate <- function(df) {
     df <- df %>% ##Exclude any LWD that do not meet minimum requirements
@@ -279,6 +288,7 @@ startUpdate <- function(df) {
     smallLWD(df) ##Identify Insufficiently Sized LWD Pieces
     largeLWD(df) ##Identify Large LWD
     printStats(df, mean.Length, mean.Diameter) ##Calculate Basic Statistics
+    graphStats(df) #Plot basic LWD statistics
     updateOrient(df) ##Calculate Orientation Chi^2 and graph
     bfStats(df)
     updateSed(df)
@@ -288,6 +298,7 @@ startUpdate <- function(df) {
     cat("\n")
     print("================================================================")
     sink()
+    return(df)
 }
 
 ##Startup, Import and Scrub Dataframe
