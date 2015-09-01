@@ -71,5 +71,12 @@
 [1] "Effect of Position Down River on Size"
 [1] "P Value: 0.158934740432092"
 [1] "### Fail to Reject Null Hypothesis ###"
+Source: local data frame [4 x 2]
+
+  Channel.Orientation   bfmean
+1                   A 93.57270
+2                   C 94.63768
+3                   B 86.01136
+4                   D 83.70370
 
 [1] "================================================================"

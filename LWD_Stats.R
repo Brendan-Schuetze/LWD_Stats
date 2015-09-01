@@ -282,10 +282,13 @@ channelOrient <- function(df) {
     df.temp <- df %>%
         group_by(Channel.Orientation) %>%
             summarise(bfmean = mean(X..Bankfull.Channel))
+
+    print(df.temp)
     
     ggplot() + geom_bar(data = df.temp, aes(x = Channel.Orientation, y = bfmean), stat = "identity") + xlab("Channel Orientation") + ylab("Mean Bankfull Percentage") + ggtitle("Bankfull Percentage by Channel Orientation") + theme_tufte()
 
     ggsave("Output/Bankfull.Channel.Orientation.jpg")
+    dev.off()
 
 }
 
