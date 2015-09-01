@@ -8,12 +8,10 @@
 ##Import Libraries
 library(ggplot2)  #Better Graphs
 library(dplyr)    #SQL-like Syntax for Datframe Manipulation
-library(plyr)     #Avoid Bugs
 library(broom)    #Tidier Summaries of Regression Models
 library(reshape2) #Dataframe Manipulation
 library(stringr)  #String Manipulation
 library(ggthemes) #Better ggplot2 Themes
-
 
 printStats <- function(df, mean.Length, mean.Diameter) { #Basic Stats about Data Collected So far
     print("================================================================")
@@ -120,7 +118,7 @@ updateOrient <- function(df) {
     ggsave("Output/Channel.Orientation.Diameter.jpg")
     
     ##Distribution of Channel Orientations By Length
-    df$Channel.Orientation <- revalue(df$Channel.Orientation, c("A" = "A Orientation", "B" = "B Orientation", "C" = "C Orientation", "D" = "D Orientation"))
+    levels(df$Channel.Orientation) <- c("A" = "A Orientation", "B" = "B Orientation", "C" = "C Orientation", "D" = "D Orientation")
     Channel.Orientation.Graph <- ggplot(data = df) + geom_density(aes(x = Length..cm.)) + facet_wrap( ~ Channel.Orientation) + xlim(200, 1800) + theme_tufte() + ggtitle("Distribution of Lengths by Channel Orientation \n") + xlab("Lengths") + ylab("Density \n")
     ggsave("Output/Channel.Orientation.Length.jpg")
     dev.off()
@@ -276,6 +274,21 @@ graphStats <- function(df) {
     dev.off()
 }
 
+channelOrient <- function(df) {
+    df$Channel.Orientation <- factor(df$Channel.Orientation, level = c("A","C","B","D"))
+    ggplot() + geom_bar(data = df, aes(x = Channel.Orientation)) + theme_tufte() + ggtitle("Orientations of LWD in the Dead Diamond River") + xlab("Channel Orientation") + ylab("Count")
+    ggsave("Output/Orientation.jpg")
+
+    df.temp <- df %>%
+        group_by(Channel.Orientation) %>%
+            summarise(bfmean = mean(X..Bankfull.Channel))
+    
+    ggplot() + geom_bar(data = df.temp, aes(x = Channel.Orientation, y = bfmean), stat = "identity") + xlab("Channel Orientation") + ylab("Mean Bankfull Percentage") + ggtitle("Bankfull Percentage by Channel Orientation") + theme_tufte()
+
+    ggsave("Output/Bankfull.Channel.Orientation.jpg")
+
+}
+
 startUpdate <- function(df) {
     df <- df %>% ##Exclude any LWD that do not meet minimum requirements
         filter(Length..cm. > 200 & Diameter..cm. > 10)
@@ -295,10 +308,11 @@ startUpdate <- function(df) {
     lengthVersusDiameterGraph(df)
     geomorphologySize(df)
     positionSize(df)
+    channelOrient(df)
     cat("\n")
     print("================================================================")
     sink()
-    return(df)
+                                     
 }
 
 ##Startup, Import and Scrub Dataframe
@@ -308,3 +322,4 @@ df <- read.csv("lwd.csv", stringsAsFactors = FALSE) %>%
 
 ##Launch Main Program
 startUpdate(df)
+
