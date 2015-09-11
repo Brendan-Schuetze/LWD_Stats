@@ -21,13 +21,13 @@ printStats <- function(df, mean.Length, mean.Diameter) { #Basic Stats about Data
     print(paste("Mean Length", mean.Length / 100, "meters"))
     print(paste("Mean Diameter", mean.Diameter, "cm"))
     print(paste("Mean Volume", (pi / 4) * ((mean.Diameter / 100) ^ 2) * (mean.Length / 100), "m^3"))
-    print(paste("Mean Frequency of", nrow(df) / 11.80, "LWD/km"))
+    print(paste("Mean Frequency of", nrow(df) / 11.80, "LWD/km")) ##hardcoded number of kilometers traveled, must be changed for other surveys
     cat("\n")
     print("================================================================")
     cat("\n")
     print("Distribution of Factor Variables")
     print(paste("Ratio of Coniferous to Deciduous to Unknown: ", nrow(filter(df, Species..C.D.U.== "C")), ":", nrow(filter(df, Species..C.D.U.== "D")), ":", nrow(filter(df, Species..C.D.U.== "U"))))
-    df <- df %>% mutate(Bank = str_sub(df$ID.Number, -1))
+    df <- df %>% mutate(Bank = str_sub(df$ID.Number, -1)) ##Split ID number into two parts, number and L/R bank placement columns
     print(paste("Ratio of L/R/U Bank Placement: ", table(df$Bank)[1], ":", table(df$Bank)[2], ":", table(df$Bank)[3]))
     print(paste("Number of Tagged Pieces:", nrow(filter(df, Tagged == "Y"))))
 }
@@ -121,13 +121,13 @@ updateOrient <- function(df) {
     levels(df$Channel.Orientation) <- c("A" = "A Orientation", "B" = "B Orientation", "C" = "C Orientation", "D" = "D Orientation")
     Channel.Orientation.Graph <- ggplot(data = df) + geom_density(aes(x = Length..cm.)) + facet_wrap( ~ Channel.Orientation) + xlim(200, 1800) + theme_tufte() + ggtitle("Distribution of Lengths by Channel Orientation \n") + xlab("Lengths") + ylab("Density \n")
     ggsave("Output/Channel.Orientation.Length.jpg")
-    dev.off()
+    
 }
 
 lengthVersusDiameterGraph <- function(df){ ##Graph Length versus Diameter
     ggplot() + geom_point(data = df, aes(x = Diameter..cm., y = Length..cm.)) + ylim(0, 5000) + geom_smooth(data = df, aes(x = Diameter..cm., y = Length..cm.)) + xlim(min(df$Diameter..cm.), 65)
     ggsave("Output/Length.Diameter.Scatterplot.jpg")
-    dev.off()
+    
 }
 
 updateSed <- function(df) {
@@ -237,12 +237,12 @@ positionSize <- function(df) {
     
     ggplot() + geom_point(data = df, aes(x = Num, y = Diameter..cm.)) + geom_smooth(data = df, aes(x = Num, y = Diameter..cm.)) + xlab("LWD Pieces (lower numbers are closer to Hellgate)") + ylab("Diameter (centimeters)") + ggtitle("Change in Diameter Down River") + ylim(10, 65) + theme_tufte()
     ggsave("Output/Position.Diameter.jpg")
-    dev.off()
+    
     
     ggplot() + geom_point(data = df, aes(x = Num, y = Volume..cm.)) + geom_smooth(data = df, aes(x = Num, y = Volume..cm.)) + xlab("LWD Pieces (lower numbers are closer to Hellgate)") + ylab("Volume (cubic centimeters)") + ggtitle("Change in Volume Down River") + theme_tufte()
     ggsave("Output/Position.Volume.jpg")
     
-    dev.off()
+    
     mod <- tidy(lm(Diameter..cm.*Length..cm. ~ Num, data = df))
     cat("\n")
     print("================================================================")
@@ -254,11 +254,11 @@ positionSize <- function(df) {
 bfStats <- function(df) {
     ggplot() + geom_density(data = df, aes(x = X..Bankfull.Channel)) + facet_wrap(~ Channel.Orientation)
     ggsave("Output/Bankfull.Percent.Dist.jpg")
-    dev.off()
+    
 
     ggplot() + geom_violin(data = df, aes(x = factor(Channel.Orientation), y = X..Bankfull.Channel)) 
     ggsave("Output/Bankfull.Percent.Dist.Violin.jpg")
-    dev.off()
+    
     
     print("Effect of Channel Orientation on Bankfull Percentage")
     bf.aov <- aov(X..Bankfull.Channel ~ Channel.Orientation, data = df)
@@ -271,25 +271,80 @@ bfStats <- function(df) {
 graphStats <- function(df) {
     ggplot() + geom_histogram(data = df, aes(x = Diameter..cm.), fill = "white", color = "black") + geom_vline(xintercept = 23.41, linetype = "longdash") + theme_tufte() + ggtitle("Distribution of Diameters") + xlab("Number of Pieces") + ylab("Density") + xlim(0, 65)
     ggsave("Output/Diameter.Density.jpg")
-    dev.off()
+    
 }
 
-channelOrient <- function(df) {
+channelOrient <- function(df) { ##Graph Frequency of LWD Orientations
     df$Channel.Orientation <- factor(df$Channel.Orientation, level = c("A","C","B","D"))
     ggplot() + geom_bar(data = df, aes(x = Channel.Orientation)) + theme_tufte() + ggtitle("Orientations of LWD in the Dead Diamond River") + xlab("Channel Orientation") + ylab("Count")
     ggsave("Output/Orientation.jpg")
 
-    df.temp <- df %>%
+    df.temp <- df %>% ##Calculate means of bankfull percentage for each orientation
         group_by(Channel.Orientation) %>%
             summarise(bfmean = mean(X..Bankfull.Channel))
-
-    print(df.temp)
     
     ggplot() + geom_bar(data = df.temp, aes(x = Channel.Orientation, y = bfmean), stat = "identity") + xlab("Channel Orientation") + ylab("Mean Bankfull Percentage") + ggtitle("Bankfull Percentage by Channel Orientation") + theme_tufte()
 
     ggsave("Output/Bankfull.Channel.Orientation.jpg")
-    dev.off()
+    
 
+}
+
+volSed <- function(df) {
+    temp <- list()
+    for(i in 2:5) { ##Split By Quantiles, in order to find distribution percentages for Chi Square
+        if(i == 2) {
+            df.temp <- df %>%
+                filter(Diameter..cm. <= quantile(df$Diameter..cm.)[[i]] & Diameter..cm. >= quantile(df$Diameter..cm.)[[i - 1]]) %>%
+                    select(Sediment.Storage..Y.N.)
+        }
+        else {
+        df.temp <- df %>%
+            filter(Diameter..cm. <= quantile(df$Diameter..cm.)[[i]] & Diameter..cm. > quantile(df$Diameter..cm.)[[i - 1]]) %>%
+                select(Sediment.Storage..Y.N.)
+        }
+        temp[i-1] <- df.temp
+    }
+    temp.first  <- table(temp[1])
+    temp.second <- table(temp[2])
+    temp.third  <- table(temp[3])
+    temp.fourth <- table(temp[4])
+    
+    final <- data.frame("Quartile" = c("First", "Second", "Third", "Fourth"), "Yes" = c(temp.first[2], temp.second[2], temp.third[2], temp.fourth[2]), "No" = c(temp.first[1], temp.second[1], temp.third[1], temp.fourth[1])) %>%
+        mutate(total = Yes + No)
+
+    final$Quartile <- factor(final$Quartile, levels = c("First", "Second", "Third", "Fourth"))
+    ggplot() + geom_bar(data = final, aes(x = Quartile, y = Yes / total), stat = "identity") + theme_tufte() + ggtitle("Increases in Diameters Coincide with Higher Rates of Sediment Storage") + xlab("\n Diameter, sorted by quartiles") + ylab("Percent Sediment Storing \n")
+    
+    ggsave("Output/VolSed.jpg")
+
+    rm(temp, final)
+    temp <- list()
+    for(i in 2:5) { ##Split By Quantiles, in order to find distribution percentages for Chi Square
+        if(i == 2) {
+            df.temp <- df %>%
+                filter(Diameter..cm. <= quantile(df$Diameter..cm.)[[i]] & Diameter..cm. >= quantile(df$Diameter..cm.)[[i - 1]]) %>%
+                    select(Pool.FF..Y.N.)
+        }
+        else {
+        df.temp <- df %>%
+            filter(Diameter..cm. <= quantile(df$Diameter..cm.)[[i]] & Diameter..cm. > quantile(df$Diameter..cm.)[[i - 1]]) %>%
+                select(Pool.FF..Y.N.)
+        }
+        temp[i-1] <- df.temp
+    }
+    temp.first  <- table(temp[1])
+    temp.second <- table(temp[2])
+    temp.third  <- table(temp[3])
+    temp.fourth <- table(temp[4])
+    
+    final <- data.frame("Quartile" = c("First", "Second", "Third", "Fourth"), "Yes" = c(temp.first[2], temp.second[2], temp.third[2], temp.fourth[2]), "No" = c(temp.first[1], temp.second[1], temp.third[1], temp.fourth[1])) %>%
+        mutate(total = Yes + No)
+
+    final$Quartile <- factor(final$Quartile, levels = c("First", "Second", "Third", "Fourth"))
+    ggplot() + geom_bar(data = final, aes(x = Quartile, y = Yes / total), stat = "identity") + theme_tufte() + ggtitle("Increases in Diameters Coincide with Higher Rates of Pool Formation") + xlab("\n Diameter, sorted by quartiles") + ylab("Percent Pool Forming \n")
+    
+    ggsave("Output/VolPool.jpg")
 }
 
 startUpdate <- function(df) {
@@ -301,20 +356,22 @@ startUpdate <- function(df) {
     mean.Diameter = mean(as.numeric((df$Diameter..cm.)))
     
     sink("Output/LWD_Stats.txt")
-    smallLWD(df) ##Identify Insufficiently Sized LWD Pieces
-    largeLWD(df) ##Identify Large LWD
+    smallLWD(df)                               ##Identify Insufficiently Sized LWD Pieces
+    largeLWD(df)                               ##Identify Large LWD
     printStats(df, mean.Length, mean.Diameter) ##Calculate Basic Statistics
-    graphStats(df) #Plot basic LWD statistics
-    updateOrient(df) ##Calculate Orientation Chi^2 and graph
+    graphStats(df)                             ##Plot basic LWD statistics
+    updateOrient(df)                           ##Calculate Orientation Chi^2 and graph
     bfStats(df)
     updateSed(df)
-    lengthVersusDiameterGraph(df)
+    lengthVersusDiameterGraph(df)              ##Create scatterplot of length and diameter
     geomorphologySize(df)
-    positionSize(df)
+    positionSize(df)                           ##Create graph of average size of LWD down river
     channelOrient(df)
+    volSed(df)                                 ##Create graph of volume versus sediment prevalence
     cat("\n")
     print("================================================================")
     sink()
+    dev.off()
                                      
 }
 
